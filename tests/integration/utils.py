@@ -34,8 +34,8 @@ def get_db_config():
     config['client_side_encryption_master_key'] = os.environ.get('CLIENT_SIDE_ENCRYPTION_MASTER_KEY')
 
     # --------------------------------------------------------------------------
-    # The following variables needs to be empty.
-    # The tests cases will set them automatically whenever it's needed
+    # The following variables need to be empty.
+    # The test cases will set them automatically whenever it's needed
     # --------------------------------------------------------------------------
     config['disable_table_cache'] = None
     config['schema_mapping'] = None
@@ -43,6 +43,7 @@ def get_db_config():
     config['hard_delete'] = None
     config['flush_all_streams'] = None
     config['validate_records'] = None
+    config['table_prefix'] = None
 
     return config
 

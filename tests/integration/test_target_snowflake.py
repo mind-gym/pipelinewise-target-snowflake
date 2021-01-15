@@ -39,6 +39,7 @@ class TestIntegration(unittest.TestCase):
 
         # Drop target schema
         if self.config['default_target_schema']:
+            snowflake.query("USE DATABASE {}".format(self.config['dbname']))
             snowflake.query("DROP SCHEMA IF EXISTS {}".format(self.config['default_target_schema']))
 
     def persist_lines(self, lines):
@@ -1093,6 +1094,18 @@ class TestIntegration(unittest.TestCase):
 
     def test_custom_role(self):
         """Test if custom role can be used"""
+        tap_lines = test_utils.get_test_tap_lines('messages-with-three-streams.json')
+
+        # Set custom role
+        self.config['role'] = 'invalid-not-existing-role'
+
+        # Using not existing or not authorized role should raise snowflake Database exception:
+        # 250001 (08001): Role 'INVALID-ROLE' specified in the connect string does not exist or not authorized.
+        with assert_raises(DatabaseError):
+            self.persist_lines_with_cache(tap_lines)
+
+    def test_append_table_prefix(self):
+        """Test if """
         tap_lines = test_utils.get_test_tap_lines('messages-with-three-streams.json')
 
         # Set custom role
