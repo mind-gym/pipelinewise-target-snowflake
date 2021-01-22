@@ -67,6 +67,12 @@ def validate_config(config):
     # Check client-side encryption config
     config_cse_key = config.get('client_side_encryption_master_key', None)
 
+    # Check if table_prefix does not conflict with reserved keywords
+    config_table_prefix = config.get('table_prefix', None)
+    if config_table_prefix == '_sdc':
+        errors.append("We do not currently allow '_sdc' as 'table_prefix' as it is reserved for System Columns "
+                      "(see: https://www.stitchdata.com/docs/data-structure/integration-schemas#sdc-columns)")
+
     return errors
 
 
@@ -415,7 +421,13 @@ class DbSync:
             return None
 
         stream_dict = stream_name_to_dict(stream_name)
-        table_name = stream_dict['table_name']
+
+        table_prefix = self.connection_config.get('table_prefix')
+        if table_prefix:
+            table_name = "{}{}".format(table_prefix, stream_dict['table_name'])
+        else:
+            table_name = stream_dict['table_name']
+
         sf_table_name = table_name.replace('.', '_').replace('-', '_').lower()
 
         if is_temporary:

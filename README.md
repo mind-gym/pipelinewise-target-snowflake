@@ -166,6 +166,7 @@ Full list of options in `config.json`:
 | temp_dir                            | String  |            | (Default: platform-dependent) Directory of temporary CSV files with RECORD messages. |
 | no_compression                      | Boolean |            | (Default: False) Generate uncompressed CSV files when loading to Snowflake. Normally, by default GZIP compressed files are generated. |
 | query_tag                           | String  |            | (Default: None) Optional string to tag executed queries in Snowflake. Replaces tokens `{{database}}`, `{{schema}}` and `{{table}}` with the appropriate values. The tags are displayed in the output of the Snowflake `QUERY_HISTORY`, `QUERY_HISTORY_BY_*` functions. |
+| table_prefix                        | String  |            | (Default: None) Optional string to get the target to append a prefix to the table names e.g. "raw_<datasource>". |
 
 ### To run tests:
 

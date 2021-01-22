@@ -10,13 +10,16 @@ VENV := .venv
 PYTHON := python3.7
 VERSION := 1.10.0
 
-## build: out/image-id
+## all: dist/pipelinewise-target-snowflake-$(VERSION).tar.gz
 all: dist/pipelinewise-target-snowflake-$(VERSION).tar.gz
 .PHONY: all
 
 clean:
+	rm -rf $(VENV)
+	rm -rf dist
+	rm -rf build
 	rm -rf tmp
-	rm -rf out
+	rm -rf pipelinewise_target_snowflake.egg-info
 .PHONY: clean
 
 tmp/.sentinel.installed-venv: requirements.txt setup.py
