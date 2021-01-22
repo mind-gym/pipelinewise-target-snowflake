@@ -337,15 +337,6 @@ class TestIntegration(unittest.TestCase):
 
         self.assert_three_streams_are_into_snowflake()
 
-    def test_loading_tables_with_client_side_encryption_and_wrong_master_key(self):
-        """Loading multiple tables from the same input tap with various columns types"""
-        tap_lines = test_utils.get_test_tap_lines('messages-with-three-streams.json')
-
-        # Turning on client-side encryption and load but using a well formatted but wrong master key
-        self.config['client_side_encryption_master_key'] = "Wr0n6m45t3rKeY0123456789a0123456789a0123456="
-        with assert_raises(ProgrammingError):
-            self.persist_lines_with_cache(tap_lines)
-
     def test_loading_tables_with_metadata_columns(self):
         """Loading multiple tables from the same input tap with various columns types"""
         tap_lines = test_utils.get_test_tap_lines('messages-with-three-streams.json')
@@ -1063,21 +1054,62 @@ class TestIntegration(unittest.TestCase):
                                  "ORDER BY 1")
         target_db = self.config['dbname']
         target_schema = self.config['default_target_schema']
+
+        # Queries expected with tag: `Loading into <DB>..`
+        # 1. START TRANSACTION
+        # 2. SHOW COLUMNS IN SCHEMA DEV.INTEGRATION_TESTS  -- target_snowflake/db_sync.py L661
+        # 3. ROLLBACK
+        # 4, SELECT query_tag, count(*) queries FROM table -- tests/integration/test_target_snowflake.py L1050
+
+        # Queries expected with tag: `Loading into <DB>.<SCHEMA>.TEST_TABLE_ONE`
+        # 1 SHOW SCHEMAS LIKE '<SCHEMA>'
+        # 2 COMMIT
+        # 3 CREATE SCHEMA IF NOT EXISTS <SCHEMA>
+        # 4 COMMIT
+        # 5 START TRANSACTION
+        # 6 SHOW TERSE TABLES IN <DB>.<SCHEMA>
+        # 7 SELECT "schema_name" AS schema_name, "name" AS table_name FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()))
+        # 8 COMMIT
+        # 9 CREATE TABLE IF NOT EXISTS <DB>.<SCHEMA>.TEST_TABLE_ONE
+        # 10 COMMIT
+        # 11 PUT FILE IN STAGE
+        # 12 COMMIT
+        # 13 MERGE INTO <DB>.<SCHEMA>.TEST_TABLE_ONE
+        # 14 COMMIT
+        # 15 REMOVE @<SCHEMA>.%TEST_TABLE_ONE/records.csv
+        # 16 COMMIT
+
+        # Queries expected with tag: `Loading into <DB>.<SCHEMA>.TEST_TABLE_TWO` and `TEST_TABLE_THREE`
+        # 1 SHOW SCHEMAS LIKE '<SCHEMA>'
+        # 2 COMMIT
+        # 3 START TRANSACTION
+        # 4 SHOW TERSE TABLES IN <DB>.<SCHEMA>
+        # 5 SELECT "schema_name" AS schema_name, "name" AS table_name FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()))
+        # 6 COMMIT
+        # 7 CREATE TABLE IF NOT EXISTS <DB>.<SCHEMA>.TEST_TABLE_ONE
+        # 8 COMMIT
+        # 9 PUT FILE IN STAGE
+        # 10 COMMIT
+        # 11 MERGE INTO <DB>.<SCHEMA>.TEST_TABLE_ONE
+        # 12 COMMIT
+        # 13 REMOVE @<SCHEMA>.%TEST_TABLE_ONE/records.csv
+        # 14 COMMIT
+
         self.assertEqual(result, [{
             'QUERY_TAG': f'PPW test tap run at {current_time}. Loading into {target_db}..',
             'QUERIES': 4
             },
             {
             'QUERY_TAG': f'PPW test tap run at {current_time}. Loading into {target_db}.{target_schema}.TEST_TABLE_ONE',
-            'QUERIES': 12
+            'QUERIES': 16
             },
             {
             'QUERY_TAG': f'PPW test tap run at {current_time}. Loading into {target_db}.{target_schema}.TEST_TABLE_THREE',
-            'QUERIES': 10
+            'QUERIES': 14
             },
             {
             'QUERY_TAG': f'PPW test tap run at {current_time}. Loading into {target_db}.{target_schema}.TEST_TABLE_TWO',
-            'QUERIES': 10
+            'QUERIES': 14
             }
         ])
 
