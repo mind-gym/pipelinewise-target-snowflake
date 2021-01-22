@@ -6,7 +6,6 @@ load_dotenv()
 
 def get_db_config():
     config = {}
-
     # --------------------------------------------------------------------------
     # Default configuration settings for integration tests.
     # --------------------------------------------------------------------------
