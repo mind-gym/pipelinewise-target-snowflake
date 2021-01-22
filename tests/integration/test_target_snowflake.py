@@ -1137,13 +1137,22 @@ class TestIntegration(unittest.TestCase):
             self.persist_lines_with_cache(tap_lines)
 
     def test_append_table_prefix(self):
-        """Test if """
+        """Test if table with prefix is created"""
         tap_lines = test_utils.get_test_tap_lines('messages-with-three-streams.json')
 
-        # Set custom role
-        self.config['role'] = 'invalid-not-existing-role'
+        # Set table_prefix
+        self.config['table_prefix'] = "raw_ds_"
 
-        # Using not existing or not authorized role should raise snowflake Database exception:
-        # 250001 (08001): Role 'INVALID-ROLE' specified in the connect string does not exist or not authorized.
-        with assert_raises(DatabaseError):
-            self.persist_lines_with_cache(tap_lines)
+        # Run
+        self.persist_lines(tap_lines)
+
+        # Assert
+        sf = DbSync(self.config)
+        res = sf.query(f"SHOW TABLES IN SCHEMA {self.config['dbname']}.{self.config['default_target_schema']}")
+        table_names_set = set([rec['name'] for rec in res])
+
+        expected_length = 3
+        expected_table_names_set = set(["RAW_DS_TEST_TABLE_ONE", "RAW_DS_TEST_TABLE_TWO", "RAW_DS_TEST_TABLE_THREE"])
+
+        assert len(res) == expected_length
+        assert table_names_set == expected_table_names_set
