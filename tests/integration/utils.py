@@ -1,8 +1,5 @@
 import os
 import json
-from dotenv import load_dotenv
-
-load_dotenv()
 
 def get_db_config():
     config = {}
