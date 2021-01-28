@@ -1,0 +1,23 @@
+---
+name: Deploy
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  Deploy:
+    name: "Uploads package to Pypi server"
+    runs-on: ubuntu-18.04
+
+    env:
+      SECRET: ${{ secrets.SECRET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: "Upload"
+        id: upload
+        run: |
+          make upload
