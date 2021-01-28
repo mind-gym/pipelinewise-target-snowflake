@@ -14,7 +14,7 @@ VERSION := 1.10.0
 all: dist/pipelinewise-target-snowflake-$(VERSION).tar.gz
 .PHONY: all
 
-## upload                                              : PHONY, dist/pipelinewise-target-snowflake-$(VERSION).tar.gz
+## upload                                              : PHONY, tmp/.sentinel.twine-upload-to-pypi
 upload: tmp/.sentinel.twine-upload-to-pypi
 .PHONY:upload
 

@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - 'main'
+      - 'master'
 
 jobs:
   Deploy:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     env:
-      SECRET: ${{ secrets.SECRET }}
+      PYPISERVER_URL: ${{ secrets.PYPISERVER_URL }}
 
     steps:
       - name: Checkout
