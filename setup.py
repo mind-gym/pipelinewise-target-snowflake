@@ -5,13 +5,13 @@ from setuptools import setup
 with open('README.md') as f:
     long_description = f.read()
 
-setup(name="pipelinewise-target-snowflake",
+setup(name="mindgym-target-snowflake",
       version="1.10.0",
       description="Singer.io target for loading data to Snowflake - PipelineWise compatible",
       long_description=long_description,
       long_description_content_type='text/markdown',
       author="TransferWise",
-      url='https://github.com/transferwise/pipelinewise-target-snowflake',
+      url='https://github.com/mind-gym/pipelinewise-target-snowflake',
       classifiers=[
           'License :: OSI Approved :: Apache Software License',
           'Programming Language :: Python :: 3 :: Only'
