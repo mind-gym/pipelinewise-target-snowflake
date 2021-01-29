@@ -910,31 +910,6 @@ class TestIntegration(unittest.TestCase):
 
         self.assert_three_streams_are_into_snowflake()
 
-    def test_aws_env_vars(self):
-        """Test loading data with credentials defined in AWS environment variables
-        than explicitly provided access keys"""
-        tap_lines = test_utils.get_test_tap_lines("messages-with-three-streams.json")
-
-        try:
-            # Save original config to restore later
-            orig_config = self.config.copy()
-
-            # Move aws access key and secret from config into environment variables
-            os.environ['AWS_ACCESS_KEY_ID'] = os.environ.get('TARGET_SNOWFLAKE_AWS_ACCESS_KEY')
-            os.environ['AWS_SECRET_ACCESS_KEY'] = os.environ.get('TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY')
-            del self.config['aws_access_key_id']
-            del self.config['aws_secret_access_key']
-
-            # Create a new S3 client using env vars
-            s3Client = S3UploadClient(self.config)
-            s3Client.create_s3_client()
-
-        # Restore the original state to not confuse other tests
-        finally:
-            del os.environ['AWS_ACCESS_KEY_ID']
-            del os.environ['AWS_SECRET_ACCESS_KEY']
-            self.config = orig_config.copy()
-
     def test_profile_based_auth(self):
         """Test AWS profile based authentication rather than access keys"""
         try:
