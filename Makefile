@@ -5,10 +5,12 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
-OBJS := $(shell find . -type f -name "*.py" -not -path "*$(VENV)/*" -not -path "*build/*" -not -path "*dist/*")
+PKG := mindgym-target-snowflake
 VENV := .venv
 PYTHON := python3.7
 VERSION := 1.10.0
+
+OBJS := $(shell find . -type f -name "*.py" -not -path "*$(VENV)/*" -not -path "*build/*" -not -path "*dist/*")
 
 ## all                                                 : PHONY, dist/pipelinewise-target-snowflake-$(VERSION).tar.gz
 all: dist/pipelinewise-target-snowflake-$(VERSION).tar.gz
@@ -56,14 +58,13 @@ tmp/.sentinel.integration-tests: tmp/.sentinel.installed-venv $(OBJS)
 	$(VENV)/bin/nosetests --where=tests/integration
 	touch $@
 
-## dist/pipelinewise-target-snowflake-$(VERSION).tar.gz: builds package
-dist/pipelinewise-target-snowflake-$(VERSION).tar.gz: tmp/.sentinel.lint tmp/.sentinel.unit-tests tmp/.sentinel.integration-tests
+## dist/$(PKG)-$(VERSION).tar.gz: builds package
+dist/$(PKG)-$(VERSION).tar.gz: tmp/.sentinel.lint tmp/.sentinel.unit-tests tmp/.sentinel.integration-tests
 	@mkdir -p $(@D)
 	$(VENV)/bin/python setup.py sdist bdist_wheel
-	touch $@
 
 ## tmp/.sentinel.twine-upload-to-pypi                  : twine uploads to Pypi server
-tmp/.sentinel.twine-upload-to-pypi: dist/pipelinewise-target-snowflake-$(VERSION).tar.gz
+tmp/.sentinel.twine-upload-to-pypi: dist/$(PKG)-$(VERSION).tar.gz
 	@mkdir -p $(@D)
 	$(VENV)/bin/twine upload \
 		--non-interactive \
